@@ -1,1 +1,1 @@
-# whmcs-paddle
+# Paddle WHMCS Payment Module
