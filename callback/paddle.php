@@ -267,7 +267,7 @@ class Paddle
     {
         $executePayment = $this->executePayment();
 
-        if (!isset($executePayment['status']) && !isset($executePayment['alert_name'])) {
+        if (!isset($executePayment['passthrough']) && !isset($executePayment['alert_name'])) {
             return [
                 'status'    => 'error',
                 'message'   => 'Invalid Response.',
