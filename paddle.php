@@ -81,7 +81,7 @@ function paddle_config($params)
         ],
         'webhookUrl'      => [
             'FriendlyName' => 'Webhook URL',
-            'Description'  => paddle_get_url($systemUrl) . '/modules/gateways/callback/paddle.php',
+            'Description'  => $systemUrl . '/modules/gateways/callback/paddle.php',
         ],
     );
 }
@@ -89,12 +89,19 @@ function paddle_config($params)
 
 function paddle_link($params)
 {
-
     $data = paddle_payment_url($params);
     if (!empty($data->success)) {
-        return '<form action="' . $data->response->url . ' " method="GET">
-        <input class="btn btn-primary" type="submit" value="' . $params['langpaynow'] . '" />
-        </form>';
+        $url = $data->response->url;
+        return "<script src='https://cdn.paddle.com/paddle/paddle.js'></script>
+        <a href='#!' id='buy' class='btn btn-success'>Pay Now</a>
+        <script type='text/javascript'>
+            function openCheckout() {
+                Paddle.Checkout.open({
+                    override: '{$url}'
+                });
+            }
+            document.getElementById('buy').addEventListener('click', openCheckout, false);
+        </script>";
     }
 
     return $data->error->message;
@@ -112,7 +119,7 @@ function paddle_payment_url($params)
     $data['product_id'] = $params["prodId"];
     $data['title'] = $params["description"];
     $data['image_url'] = $params["logoUrl"];
-    $data['return_url'] = paddle_get_url($systemUrl) . '/viewinvoice.php?id=' . $invoiceId;
+    $data['return_url'] = $systemUrl . '/viewinvoice.php?id=' . $invoiceId;
     $data['marketing_consent'] = $params["marketing_emails_opt_in"];
     $data['customer_country'] = $params['clientdetails']['country'];
     $data['customer_postcode'] = $params['clientdetails']['postcode'];
@@ -146,15 +153,4 @@ function paddle_payment_url($params)
     curl_close($curl);
     $result = json_decode($response);
     return $result;
-}
-
-function paddle_get_url($input)
-{
-    $input = trim($input);
-    if (!preg_match('#^http(s)?://#', $input)) {
-        $input = 'https://' . $input;
-    }
-    $urlHost = parse_url($input, PHP_URL_HOST);
-    $domain = preg_replace('/^www\./', '', $urlHost);
-    return 'https://' . $domain;
 }
